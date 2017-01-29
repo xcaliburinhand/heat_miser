@@ -7,27 +7,27 @@
 			google.charts.load('current', {
 				'packages' : ['timeline']
 			});
-			google.charts.setOnLoadCallback(drawEquipChart);
 
-            function displayDate(direction) {
-            	if (document.getElementById('dateString').innerText==='') {
-            		var startDate=new Date(startDate=Date.now());
-            	} else {
-            		var startDate=new Date(document.getElementById('dateString').innerText);
-            	}
-            	if (direction=="+") {
-            		newDate=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+1);
-                } else if (direction=="-") {
-            		newDate=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()-1);
-            	} else {
-            		newDate=startDate;
-            	}
-            	document.getElementById('dateString').innerText = newDate.toDateString();
-            	google.charts.setOnLoadCallback(drawEquipChart);
-            	google.charts.setOnLoadCallback(drawHeatChart);
-            }
+			function displayDate(direction) {
+				if (document.getElementById('dateString').innerText === '') {
+					var startDate = new Date( startDate = Date.now());
+				} else {
+					var startDate = new Date(document.getElementById('dateString').innerText);
+				}
+				if (direction == "+") {
+					newDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 1);
+				} else if (direction == "-") {
+					newDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() - 1);
+				} else {
+					newDate = startDate;
+				}
+				document.getElementById('dateString').innerText = newDate.toDateString();
+				google.charts.setOnLoadCallback(drawEquipChart);
+				google.charts.setOnLoadCallback(drawHeatChart);
+			}
+
 			function drawEquipChart() {
-				var beginDate= new Date(document.getElementById('dateString').innerText);
+				var beginDate = new Date(document.getElementById('dateString').innerText);
 				var data = new google.visualization.DataTable();
 				data.addColumn('string', 'Zone');
 				data.addColumn('date', 'Equipment On');
@@ -38,8 +38,8 @@
 				var options = {
 					height : 275,
 					hAxis : {
-						minValue : new Date(beginDate.getFullYear(),beginDate.getMonth(),beginDate.getDate(),0,0),
-						maxValue : new Date(beginDate.getFullYear(),beginDate.getMonth(),beginDate.getDate(),23,59)
+						minValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 0, 0),
+						maxValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 23, 59)
 					},
 					timeline : {
 						groupByRowLabel : true
@@ -50,8 +50,9 @@
 
 				chart.draw(data, options);
 			}
+
 			function drawHeatChart() {
-				var beginDate= new Date(document.getElementById('dateString').innerText);
+				var beginDate = new Date(document.getElementById('dateString').innerText);
 				var data = new google.visualization.DataTable();
 				data.addColumn('string', 'Zone');
 				data.addColumn('date', 'Equipment On');
@@ -90,7 +91,10 @@
 		<div id="equip_chart_div"></div>
 		<div id="heat_chart_div"></div>
 		<div id="date_selector">
-			<a onclick='displayDate("-");'>&lt;</a> <span id="dateString"><script>displayDate();</script></span> <a onclick='displayDate("+");'>&gt;</a>
+			<a onclick='displayDate("-");' style="cursor: hand">&lt;</a>&nbsp;<span id="dateString">
+				<script>
+					displayDate();
+				</script></span>&nbsp;<a onclick='displayDate("+");' style="cursor: hand">&gt;</a>
 		</div>
 	</body>
 </html>
