@@ -44,6 +44,13 @@ with open('fake_data') as csvfile:
         if device not in status_store or status_store[device]==None:
           logging.debug('setting %s to on in status_store',device)
           status_store[device]=row['time']
-          
+
+# drain status_store
+for device in equip:
+  if device not in status_store:
+    pass
+  elif status_store[device]!=None:
+    rows.append({"c":[{"v":device,"f":None},{"v":"Date("+status_store[device]+")","f":None},{"v":"Date("+row['time']+")","f":None}]})
+
 dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
