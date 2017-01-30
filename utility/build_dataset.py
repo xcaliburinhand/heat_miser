@@ -1,6 +1,7 @@
 
 import copy
 import csv
+import datetime
 import json
 import logging
 
@@ -38,7 +39,11 @@ with open('fake_data') as csvfile:
           pass
         else:
           logging.debug('writing data point and changing %s to off in status_store',device)
-          rows.append({"c":[{"v":device,"f":None},{"v":"Date("+status_store[device]+")","f":None},{"v":"Date("+row['time']+")","f":None}]})
+          rows.append({"c":[{"v":device,"f":None},{"v":"Date("+
+            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime('%Y, %m, %d, %H, %M')+
+            ")","f":None},{"v":"Date("+
+            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime('%Y, %m-1, %d, %H, %M')+
+            ")","f":None}]})
           status_store[device]=None
       elif row[device]=='1':
         if device not in status_store or status_store[device]==None:
@@ -50,7 +55,11 @@ for device in equip:
   if device not in status_store:
     pass
   elif status_store[device]!=None:
-    rows.append({"c":[{"v":device,"f":None},{"v":"Date("+status_store[device]+")","f":None},{"v":"Date("+row['time']+")","f":None}]})
+    rows.append({"c":[{"v":device,"f":None},{"v":"Date("+
+      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime('%Y, %m, %d, %H, %M')+
+      ")","f":None},{"v":"Date("+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime('%Y, %m, %d, %H, %M')+
+      ")","f":None}]})
 
 dataTable={"cols":cols,"rows":rows}
-logging.debug(dataTable)
+logging.debug(json.dumps(dataTable))
