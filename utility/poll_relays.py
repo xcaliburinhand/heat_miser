@@ -1,6 +1,8 @@
 
+import datetime
 import json
 import logging
+import time
 
 hd=False
 
@@ -15,14 +17,16 @@ if hd==True:
   header = 'burner  '
   result = '1'.ljust(8)
 else:
-  result='1,'
+  result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')+','
+  result+='1'
 
 for zone in config['zones']:
   if hd==True:
     header += zone+'  '
     result += '0'.ljust(2+len(zone))
   else:
-    result += '0,'
+    result += ','
+    result += '0'
   
 try:
   print(header)
