@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>Heat Miser</title>
 		<link rel="stylesheet" href="style.css" />
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script type="text/javascript">
 			google.charts.load('current', {
 				'packages' : ['timeline']
@@ -28,12 +30,17 @@
 
 			function drawEquipChart() {
 				var beginDate = new Date(document.getElementById('dateString').innerText);
-				var data = new google.visualization.DataTable();
-				data.addColumn('string', 'Zone');
-				data.addColumn('date', 'Equipment On');
-				data.addColumn('date', 'Equipment Off');
-
-				data.addRows([['Zone 1', new Date(2017, 1, 5, 2, 45), new Date(2017, 1, 5, 3, 0)], ['Zone 2', new Date(2017, 1, 5, 13, 33), new Date(2017, 1, 5, 13, 55)], ['Zone 3', new Date(2017, 1, 5, 2, 45), new Date(2017, 1, 5, 3, 0)], ['Zone 4', new Date(2017, 1, 5, 2, 45), new Date(2017, 1, 5, 3, 0)], ['Burner', new Date(2017, 1, 5, 2, 45), new Date(2017, 1, 5, 3, 0)]]);
+				var jsonData = $.ajax({
+					url : "data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + beginDate.getDate() + ".json",
+					dataType : "json",
+					async : false
+				}).responseText;
+				try {
+					var data = new google.visualization.DataTable(jsonData);
+				} catch (err) {
+					document.getElementById('equip_chart_div').innerHTML = '<b>No data available</b><br/>';
+					return;
+				}
 
 				var options = {
 					height : 275,
@@ -91,10 +98,10 @@
 		<div id="equip_chart_div"></div>
 		<div id="heat_chart_div"></div>
 		<div id="date_selector">
-			<a onclick='displayDate("-");' style="cursor: hand">&lt;</a>&nbsp;<span id="dateString">
+			<a onclick='displayDate("-");' style="cursor: pointer">&lt;</a>&nbsp;<span id="dateString">
 				<script>
 					displayDate();
-				</script></span>&nbsp;<a onclick='displayDate("+");' style="cursor: hand">&gt;</a>
+				</script></span>&nbsp;<a onclick='displayDate("+");' style="cursor: pointer">&gt;</a>
 		</div>
 	</body>
 </html>

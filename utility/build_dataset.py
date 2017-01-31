@@ -40,13 +40,13 @@ with open('fake_data') as csvfile:
         else:
           logging.debug('writing data point and changing %s to off in status_store',device)
           rows.append({"c":[{"v":device,"f":None},{"v":
-            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime('Date(%Y, ')+
-            str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").month-1)+
-            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime(', %d, %H, %M)')
+            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+            str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
             ,"f":None},{"v":
-            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime('Date(%Y, ')+
-            str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").month-1)+
-            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime(', %d, %H, %M)')
+            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+            str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
             ,"f":None}]})
           status_store[device]=None
       elif row[device]=='1':
@@ -60,14 +60,16 @@ for device in equip:
     pass
   elif status_store[device]!=None:
     rows.append({"c":[{"v":device,"f":None},{"v":
-      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime('Date(%Y, ')+
-      str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").month-1)+
-      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M:%S").strftime(', %d, %H, %M)')
+      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
       ,"f":None},{"v":
-      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime('Date(%Y, ')+
-      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").month-1)+
-      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M:%S").strftime(', %d, %H, %M)')
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
       ,"f":None}]})
 
 dataTable={"cols":cols,"rows":rows}
+with open('../www/data/20170130.json','w') as out:
+  json.dump(dataTable,out)
 logging.debug(json.dumps(dataTable))

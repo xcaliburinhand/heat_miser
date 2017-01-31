@@ -17,7 +17,7 @@ if hd==True:
   header = 'burner  '
   result = '1'.ljust(8)
 else:
-  result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')+','
+  result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')+','
   result+='1'
 
 for zone in config['zones']:
