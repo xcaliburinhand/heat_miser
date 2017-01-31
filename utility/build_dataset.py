@@ -74,6 +74,18 @@ for device in equip:
       datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
       ,"f":None}]})
 
+# ensure all devices are added to table
+for device in equip:
+  rows.append({"c":[{"v":device,"f":None},{"v":
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+    ,"f":None},{"v":
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+    ,"f":None}]})
+    
 # get current device status
 last_five_rows = sorted(last_five_rows, key=itemgetter('time'), reverse=True) 
 logging.debug("last five rows: %s",last_five_rows)
