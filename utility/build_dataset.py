@@ -25,6 +25,7 @@ equip=copy.copy(fields)
 equip.remove('time')
 
 status_store={}
+call_store={}
 rows =[]
 calls = []
 last_five_rows=[None]*5
@@ -64,17 +65,9 @@ with open('fake_data') as csvfile:
               str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
               datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
               ,"f":None}]})
-          calls.append({"c":[{"v":"Heat Call","f":None},{"v":
-            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-            str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
-            datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
-            ,"f":None},{"v":
-            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-            str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-            datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
-            ,"f":None}]})
           status_store[device]=None
       elif row[device]=='1':
+        call_store[row['time']]=1
         if device not in status_store or status_store[device]==None:
           logging.debug('setting %s to on in status_store',device)
           status_store[device]=row['time']
@@ -105,15 +98,6 @@ for device in equip:
         str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
         datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
         ,"f":None}]})
-    calls.append({"c":[{"v":"Heat Call","f":None},{"v":
-      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-      str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
-      datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
-      ,"f":None},{"v":
-      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
-      ,"f":None}]})
 
 # ensure all devices are added to table
 for device in equip:
@@ -137,25 +121,49 @@ for device in equip:
       str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
       datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
       ,"f":None}]})
-  calls.append({"c":[{"v":"Heat Call","f":None},{"v":
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
-    ,"f":None},{"v":
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
-    ,"f":None}]})
-  calls.append({"c":[{"v":"Burner","f":None},{"v":
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
-    ,"f":None},{"v":
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
-    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
-    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
-    ,"f":None}]})
-    
+calls.append({"c":[{"v":"Heat Call","f":None},{"v":
+  datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+  str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+  datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+  ,"f":None},{"v":
+  datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+  str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+  datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+  ,"f":None}]})
+
+calllist = call_store.keys()
+calllist.sort()
+logging.debug(calllist)
+end=None
+for calltime in calllist:
+  if end==None:
+    beg=calltime
+    end=calltime
+  elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(calllist[len(calllist)-1],"%Y-%m-%d %H:%M")).total_seconds()==0:
+    calls.append({"c":[{"v":"Heat Call","f":None},{"v":
+      datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      ,"f":None},{"v":
+      datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      ,"f":None}]})
+  elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")).total_seconds()>60:
+    calls.append({"c":[{"v":"Heat Call","f":None},{"v":
+      datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      ,"f":None},{"v":
+      datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      ,"f":None}]})
+    beg=calltime
+    end=calltime
+  elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")).total_seconds()==60:
+    end=calltime
+
 # get current device status
 last_five_rows = sorted(last_five_rows, key=itemgetter('time'), reverse=True) 
 logging.debug("last five rows: %s",last_five_rows)
