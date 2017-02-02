@@ -26,6 +26,20 @@
 				document.getElementById('dateString').innerText = newDate.toDateString();
 				google.charts.setOnLoadCallback(drawEquipChart);
 				google.charts.setOnLoadCallback(drawHeatChart);
+				updateCurrentState();
+			}
+
+			function updateCurrentState() {
+				$.getJSON('data/current_state.json', function(data) {
+					$.each(data, function(key, value) {
+						if (value == 1) {
+							var indicator = "background:red";
+						} else {
+							var indicatore = "";
+						}
+						$("#indicators").append("<div id=\"indicator_" + key + "\" style=\"text-align:center;width:50px;\"><p>" + key + "</p><div class=\"circle\" style=\"margin:0 auto;" + indicator + "\"></div></div>");
+					});
+				});
 			}
 
 			function drawEquipChart() {
@@ -86,12 +100,7 @@
 	</head>
 	<body>
 		<div id="indicators">
-			<div id="indicator_burner" style="text-align:center;width:50px;">
-				<p>
-					Burner
-				</p>
-				<div class="circle" style="margin:0 auto;"></div>
-			</div>
+
 		</div>
 		<br>
 		<br>
