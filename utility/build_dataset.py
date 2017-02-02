@@ -26,6 +26,7 @@ equip.remove('time')
 
 status_store={}
 rows =[]
+calls = []
 last_five_rows=[None]*5
 i=0
 
@@ -43,7 +44,27 @@ with open('fake_data') as csvfile:
           pass
         else:
           logging.debug('writing data point and changing %s to off in status_store',device)
-          rows.append({"c":[{"v":device,"f":None},{"v":
+          if device.lower()=='burner':
+            calls.append({"c":[{"v":device.title(),"f":None},{"v":
+              datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+              str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+              datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+              ,"f":None},{"v":
+              datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+              str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+              datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+              ,"f":None}]})
+          else:
+            rows.append({"c":[{"v":device.title(),"f":None},{"v":
+              datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+              str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+              datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+              ,"f":None},{"v":
+              datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+              str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+              datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+              ,"f":None}]})
+          calls.append({"c":[{"v":"Heat Call","f":None},{"v":
             datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
             str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
             datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
@@ -64,7 +85,27 @@ for device in equip:
   if device not in status_store:
     pass
   elif status_store[device]!=None:
-    rows.append({"c":[{"v":device,"f":None},{"v":
+    if device.lower()=='burner':
+      calls.append({"c":[{"v":device.title(),"f":None},{"v":
+        datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+        str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+        datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+        ,"f":None},{"v":
+        datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+        str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+        datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+        ,"f":None}]})
+    else:
+      rows.append({"c":[{"v":device.title(),"f":None},{"v":
+        datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+        str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
+        datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+        ,"f":None},{"v":
+        datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+        str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+        datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+        ,"f":None}]})
+    calls.append({"c":[{"v":"Heat Call","f":None},{"v":
       datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
       str(datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").month-1)+
       datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
@@ -76,7 +117,36 @@ for device in equip:
 
 # ensure all devices are added to table
 for device in equip:
-  rows.append({"c":[{"v":device,"f":None},{"v":
+  if device.lower()=='burner':
+    calls.append({"c":[{"v":device.title(),"f":None},{"v":
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+      ,"f":None},{"v":
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+      ,"f":None}]})
+  else:
+    rows.append({"c":[{"v":device.title(),"f":None},{"v":
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+      ,"f":None},{"v":
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+      str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+      datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+      ,"f":None}]})
+  calls.append({"c":[{"v":"Heat Call","f":None},{"v":
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+    ,"f":None},{"v":
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
+    str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
+    datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
+    ,"f":None}]})
+  calls.append({"c":[{"v":"Burner","f":None},{"v":
     datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
     str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
     datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d)')
@@ -100,5 +170,10 @@ for device in equip:
 with open('../www/data/current_state.json','w') as out:
   json.dump(current_status,out)
 dataTable={"cols":cols,"rows":rows}
-with open('../www/data/20170130.json','w') as out:
+logging.debug(dataTable)
+with open('../www/data/20170201.json','w') as out:
   json.dump(dataTable,out)
+dataTable={"cols":cols,"rows":calls}
+with open('../www/data/20170201_overall.json','w') as out:
+  json.dump(dataTable,out)
+  

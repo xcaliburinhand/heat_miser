@@ -44,8 +44,9 @@
 
 			function drawEquipChart() {
 				var beginDate = new Date(document.getElementById('dateString').innerText);
+				var d = beginDate.getDate() > 9 ? beginDate.getDate() : "0" + beginDate.getDate();
 				var jsonData = $.ajax({
-					url : "data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + beginDate.getDate() + ".json",
+					url : "data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + d + ".json",
 					dataType : "json",
 					async : false
 				}).responseText;
@@ -74,18 +75,24 @@
 
 			function drawHeatChart() {
 				var beginDate = new Date(document.getElementById('dateString').innerText);
-				var data = new google.visualization.DataTable();
-				data.addColumn('string', 'Zone');
-				data.addColumn('date', 'Equipment On');
-				data.addColumn('date', 'Equipment Off');
-
-				data.addRows([['Heat Call', new Date(2017, 1, 5, 2, 45), new Date(2017, 1, 5, 4, 0)], ['Burner', new Date(2017, 1, 5, 3, 33), new Date(2017, 1, 5, 3, 55)]]);
+				var d = beginDate.getDate() > 9 ? beginDate.getDate() : "0" + beginDate.getDate();
+				var jsonData = $.ajax({
+					url : "data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + d + "_overall.json",
+					dataType : "json",
+					async : false
+				}).responseText;
+				try {
+					var data = new google.visualization.DataTable(jsonData);
+				} catch (err) {
+					document.getElementById('equip_chart_div').innerHTML = '<b>No data available</b><br/>';
+					return;
+				}
 
 				var options = {
 					height : 175,
 					hAxis : {
-						minValue : new Date(2017, 1, 5, 0, 0),
-						maxValue : new Date(2017, 1, 5, 23, 59)
+						minValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 0, 0),
+						maxValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 23, 59)
 					},
 					timeline : {
 						groupByRowLabel : true
@@ -99,9 +106,7 @@
 		</script>
 	</head>
 	<body>
-		<div id="indicators">
-
-		</div>
+		<div id="indicators" style="display:flex;"></div>
 		<br>
 		<br>
 		<div id="equip_chart_div"></div>
