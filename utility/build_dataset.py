@@ -20,6 +20,8 @@ with open('config.json') as configfile:
   
 for zone in config['zones']:
   fields.append(str(zone))
+for therm in config['thermostats']:
+  fields.append(str(therm))
 
 equip=copy.copy(fields)
 equip.remove('time')
@@ -179,9 +181,9 @@ with open(config['data_dir']+'/current_state.json','w') as out:
   json.dump(current_status,out)
 dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
-with open(config['data_dir']+'/20170201.json','w') as out:
+with open(config['data_dir']+'/20170203.json','w') as out:
   json.dump(dataTable,out)
 dataTable={"cols":cols,"rows":calls}
-with open(config['data_dir']+'/20170201_overall.json','w') as out:
+with open(config['data_dir']+'/20170203_overall.json','w') as out:
   json.dump(dataTable,out)
   

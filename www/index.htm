@@ -31,13 +31,14 @@
 
 			function updateCurrentState() {
 				$.getJSON('data/current_state.json', function(data) {
+					$("#indicators").empty();
 					$.each(data, function(key, value) {
 						if (value == 1) {
 							var indicator = "background:red";
 						} else {
-							var indicatore = "";
+							var indicator = "";
 						}
-						$("#indicators").append("<div id=\"indicator_" + key + "\" style=\"text-align:center;width:50px;\"><p>" + key + "</p><div class=\"circle\" style=\"margin:0 auto;" + indicator + "\"></div></div>");
+						$("#indicators").append("<div id=\"indicator_" + key + "\" style=\"text-align:center;width:80px;height:40px;\"><p style=\"height:34px;\">" + key + "</p><div class=\"circle\" style=\"margin:0 auto;" + indicator + "\"></div></div>");
 					});
 				});
 			}
@@ -58,7 +59,7 @@
 				}
 
 				var options = {
-					height : 275,
+					height : 350,
 					hAxis : {
 						minValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 0, 0),
 						maxValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 23, 59)
@@ -84,7 +85,7 @@
 				try {
 					var data = new google.visualization.DataTable(jsonData);
 				} catch (err) {
-					document.getElementById('equip_chart_div').innerHTML = '<b>No data available</b><br/>';
+					document.getElementById('heat_chart_div').innerHTML = '<b>No data available</b><br/>';
 					return;
 				}
 
@@ -106,7 +107,7 @@
 		</script>
 	</head>
 	<body>
-		<div id="indicators" style="display:flex;"></div>
+		<div id="indicators" style="display:flex;height:60px;"></div>
 		<br>
 		<br>
 		<div id="equip_chart_div"></div>
