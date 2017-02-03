@@ -175,13 +175,13 @@ for device in equip:
       current_status[device]=last_five_rows[i][device]
       break
 
-with open('../www/data/current_state.json','w') as out:
+with open(config['data_dir']+'/current_state.json','w') as out:
   json.dump(current_status,out)
 dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
-with open('../www/data/20170201.json','w') as out:
+with open(config['data_dir']+'/20170201.json','w') as out:
   json.dump(dataTable,out)
 dataTable={"cols":cols,"rows":calls}
-with open('../www/data/20170201_overall.json','w') as out:
+with open(config['data_dir']+'/20170201_overall.json','w') as out:
   json.dump(dataTable,out)
   
