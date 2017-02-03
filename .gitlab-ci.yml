@@ -7,5 +7,5 @@ Deploy Containers:
   script:
     - rm -rf /var/www/html/*
     - cp -r ${CI_PROJECT_DIR}/www/* /var/www/html/
-    - rm -f /opt/heatmiser/*
+    - rm -f /opt/heatmiser/*.py
     - cp -r ${CI_PROJECT_DIR}/utility/* /opt/heatmiser/
