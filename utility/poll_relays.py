@@ -20,7 +20,7 @@ except ImportError:
 if nopi!=True:
   GPIO.setmode(GPIO.BOARD)
 
-hd=True
+hd=False
 
 try:
   with open("/etc/heatmiser/config.json") as config_file:
