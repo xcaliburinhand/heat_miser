@@ -7,6 +7,8 @@ import random
 import re
 import time
 
+logging.basicConfig(level=logging.INFO)
+
 try:
   import RPi.GPIO as GPIO
   nopi=False
