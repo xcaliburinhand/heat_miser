@@ -422,6 +422,9 @@ You have {expiry} minutes.
         """Return list of thermostats"""
         if not self.thermostat_ids:
             self.update()
+            
+        for tid in self.thermostat_ids:
+          self.log.debug("tid: %s",tid)
 
         return list(Thermostat(self, tid) for tid in self.thermostat_ids)
 
@@ -448,7 +451,7 @@ You have {expiry} minutes.
 
         except requests.exceptions.ConnectionError as e:
             self.log.error(e)
-            raise EcobeeException("Connection error: {}".format(e)) from None
+            raise EcobeeException("Connection error: {}".format(e)) #from None
 
 
     def post(self, endpoint, data):
@@ -467,7 +470,7 @@ You have {expiry} minutes.
         except requests.exceptions.ConnectionError as e:
             self.log.error(e)
             self.log.error(r.request)
-            raise EcobeeException("Connection error: {}".format(e)) from None
+            raise EcobeeException("Connection error: {}".format(e)) #from None
 
 
     def _handle_error(self, response):
@@ -493,7 +496,7 @@ You have {expiry} minutes.
         # failed to parse the JSON so this must be bad
         except ValueError:
             self.log.error("Response not JSON: {}".format(response.text))
-            raise EcobeeException("Response not JSON: {}".format(response.text)) from None
+            raise EcobeeException("Response not JSON: {}".format(response.text)) #from None
 
 
     def _raw_get(self, endpoint, **kwargs):
@@ -504,7 +507,7 @@ You have {expiry} minutes.
             return requests.get(url, params=kwargs, headers=h)
         except requests.exceptions.ConnectionError as e:
             self.log.error(e)
-            raise EcobeeException("Connection error: {}".format(e)) from None
+            raise EcobeeException("Connection error: {}".format(e)) #from None
 
 
     def _raw_post(self, endpoint, **kwargs):
@@ -515,4 +518,4 @@ You have {expiry} minutes.
             return requests.post(url, params=kwargs, headers=h)
         except requests.exceptions.ConnectionError as e:
             self.log.error(e)
-            raise EcobeeException("Connection error: {}".format(e)) from None
+            raise EcobeeException("Connection error: {}".format(e)) #from None

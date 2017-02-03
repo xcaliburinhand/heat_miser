@@ -1,8 +1,10 @@
 
 import datetime
+import ecobee
 import json
 import logging
 import random
+import re
 import time
 
 try:
@@ -15,7 +17,7 @@ except ImportError:
 if nopi!=True:
   GPIO.setmode(GPIO.BOARD)
 
-hd=False
+hd=True
 
 try:
   with open("config.json") as config_file:
@@ -45,11 +47,39 @@ for zone in config['zones']:
     status=random.randrange(0,2)
   if hd==True:
     header += zone+'  '
-    result += '0'.ljust(2+len(zone))
+    result += str(status).ljust(2+len(zone))
   else:
     result += ','
-    result += '0'
-  
+    result += str(status)
+
+if datetime.datetime.now().minute % 5 == 0:
+  bee=ecobee.Client('LXaXX6lrtFoRml81RPvS0Q07BGrFoaeh')
+  data = bee.get("thermostatSummary", {
+        "selection": {
+            "selectionType":  "registered",
+            "selectionMatch": "",
+            "includeEquipmentStatus":   True
+        }
+    })
+  status_list=data['statusList']
+
+for therm in config['thermostats']:
+  if datetime.datetime.now().minute % 5 == 0:
+      regex=re.compile(".*("+config['thermostats'][therm]+").*")
+      equip_status = [m.group(0) for l in status_list for m in [regex.search(l)] if m]
+      if "heat" in equip_status[0].lower():
+        status = '1'
+      else:
+        status = '0'
+  else:
+    status = '-'
+  if hd==True:
+    header += therm+'  '
+    result += str(status).ljust(2+len(therm))
+  else:
+    result += ','
+    result += str(status)
+
 try:
   print(header)
 except:
