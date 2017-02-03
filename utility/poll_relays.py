@@ -8,9 +8,10 @@ import re
 import time
 
 try:
-    import RPi.GPIO as GPIO
+  import RPi.GPIO as GPIO
+  nopi=False
 except RuntimeError:
-    logging.error("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
+  logging.error("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 except ImportError:
   nopi=True
 
@@ -20,7 +21,7 @@ if nopi!=True:
 hd=True
 
 try:
-  with open("config.json") as config_file:
+  with open("/etc/heatmiser/config.json") as config_file:
     config = json.load(config_file)
 except Exception as e:
   logging.error("Config file error {0}".format(e))
@@ -33,7 +34,7 @@ else:
   status=random.randrange(0,2)
 
 if hd==True:
-  header = 'burner  '
+  header = 'Burner  '
   result = str(status).ljust(8)
 else:
   result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')+','
@@ -41,8 +42,8 @@ else:
 
 for zone in config['zones']:
   if nopi!=True:
-    GPIO.setup(zone['pin'], GPIO.IN)
-    status=GPIO.input(zone['pin'])
+    GPIO.setup(config['zones'][zone]['pin'], GPIO.IN)
+    status=GPIO.input(config['zones'][zone]['pin'])
   else:
     status=random.randrange(0,2)
   if hd==True:
@@ -53,7 +54,7 @@ for zone in config['zones']:
     result += str(status)
 
 if datetime.datetime.now().minute % 5 == 0:
-  bee=ecobee.Client('LXaXX6lrtFoRml81RPvS0Q07BGrFoaeh')
+  bee=ecobee.Client('LXaXX6lrtFoRml81RPvS0Q07BGrFoaeh',authfile='/etc/heatmiser/ecobee.conf')
   data = bee.get("thermostatSummary", {
         "selection": {
             "selectionType":  "registered",
