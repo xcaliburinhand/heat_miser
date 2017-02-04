@@ -98,7 +98,7 @@ if nopi!=True:
 if hd==True:
   print(header)
 print(result)
-with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'.json','a') as run_data:
+with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'.csv','a') as run_data:
   run_data.write(result+'\n')
   
 #update cache

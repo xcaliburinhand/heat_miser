@@ -4,9 +4,13 @@ import csv
 import datetime
 import json
 import logging
+import os
+import time
 from operator import itemgetter
 
 logging.basicConfig(level=logging.DEBUG)
+os.environ['TZ'] = 'US/Eastern'
+now = datetime.datetime.fromtimestamp(time.time())
 
 fields=['time','burner']
 cols= [
@@ -20,8 +24,11 @@ with open('config.json') as configfile:
   
 for zone in config['zones']:
   fields.append(str(zone))
+
+therms=[]
 for therm in config['thermostats']:
   fields.append(str(therm))
+  therms.append(str(therm))
 
 equip=copy.copy(fields)
 equip.remove('time')
@@ -32,7 +39,7 @@ rows =[]
 calls = []
 i=0
 
-with open('fake_data') as csvfile:
+with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'.csv') as csvfile:
   reader = csv.DictReader(csvfile,fieldnames=fields)
   for row in reader:
     logging.debug(row)
@@ -67,7 +74,8 @@ with open('fake_data') as csvfile:
               ,"f":None}]})
           status_store[device]=None
       elif row[device]=='1':
-        call_store[row['time']]=1
+        if device not in therms:
+          call_store[row['time']]=1
         if device not in status_store or status_store[device]==None:
           logging.debug('setting %s to on in status_store',device)
           status_store[device]=row['time']
@@ -140,6 +148,7 @@ for calltime in calllist:
     beg=calltime
     end=calltime
   elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(calllist[len(calllist)-1],"%Y-%m-%d %H:%M")).total_seconds()==0:
+    # last line in call list
     calls.append({"c":[{"v":"Heat Call","f":None},{"v":
       datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
       str(datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").month-1)+
@@ -147,9 +156,10 @@ for calltime in calllist:
       ,"f":None},{"v":
       datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
       str(datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").month-1)+
-      datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")+datetime.timedelta(minutes=1)).strftime(', %d, %H, %M)')
       ,"f":None}]})
   elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")).total_seconds()>60:
+    # break between data points
     logging.debug((datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")).total_seconds())
     calls.append({"c":[{"v":"Heat Call","f":None},{"v":
       datetime.datetime.strptime(beg,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
@@ -158,18 +168,19 @@ for calltime in calllist:
       ,"f":None},{"v":
       datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
       str(datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").month-1)+
-      datetime.datetime.strptime(end,"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
+      (datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")+datetime.timedelta(minutes=1)).strftime(', %d, %H, %M)')
       ,"f":None}]})
     beg=calltime
     end=calltime
   elif (datetime.datetime.strptime(calltime,"%Y-%m-%d %H:%M")-datetime.datetime.strptime(end,"%Y-%m-%d %H:%M")).total_seconds()==60:
+    # no transition
     end=calltime
 
 dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
-with open(config['data_dir']+'/20170203.json','w') as out:
+with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'.json','w') as out:
   json.dump(dataTable,out)
 dataTable={"cols":cols,"rows":calls}
-with open(config['data_dir']+'/20170203_overall.json','w') as out:
+with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_overall.json','w') as out:
   json.dump(dataTable,out)
   
