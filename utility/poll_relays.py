@@ -3,9 +3,11 @@ import datetime
 import ecobee
 import json
 import logging
+import pytz
 import random
 import re
 import time
+from collections import deque
 
 logging.basicConfig(level=logging.INFO)
 
@@ -39,6 +41,7 @@ if hd==True:
   header = 'Burner  '
   result = str(status).ljust(8)
 else:
+  header = 'timestamp,Burner'
   result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')+','
   result+=str(status)
 
@@ -52,6 +55,8 @@ for zone in config['zones']:
     header += zone+'  '
     result += str(status).ljust(2+len(zone))
   else:
+    header += ','
+    header += zone
     result += ','
     result += str(status)
 
@@ -80,14 +85,50 @@ for therm in config['thermostats']:
     header += therm+'  '
     result += str(status).ljust(2+len(therm))
   else:
+    header += ','
+    header += therm
     result += ','
     result += str(status)
 
-try:
+if hd==True:
   print(header)
-except:
-  pass
 print(result)
 
 if nopi!=True:
   GPIO.cleanup()
+  
+#update cache
+try:
+  with open('.cache') as cache_file:
+    cache_list=deque(cache_file,5)
+except IOError:
+  cache_list=deque()
+cache_list.append(result+'\n')
+logging.debug('current cache: %s',cache_list)
+
+with open('.cache','w') as cache_file:
+  for line in cache_list:
+    cache_file.write(line)
+
+current_state={}
+cache_list.reverse()
+i=0
+for heading in header.split(','):
+  if heading=='timestamp':
+    i+=1 
+    continue
+  for cache_item in cache_list:
+    cache_val=cache_item.split(',')[i].strip()
+    if cache_val=='0' or cache_val=='1':
+      current_state[heading]=cache_val
+      logging.debug('%s is %s at %s',heading,cache_val,cache_item.split(',')[0])
+      break
+  i+=1
+  
+with open(config['data_dir']+'/current_state.json','w') as out:
+  json.dump(current_state,out)
+  
+  
+  
+
+  
