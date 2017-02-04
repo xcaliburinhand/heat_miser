@@ -98,19 +98,19 @@ if nopi!=True:
 if hd==True:
   print(header)
 print(result)
-with open('run_data/'+now.strftime('%Y%m%d')+'.json','a') as run_data:
+with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'.json','a') as run_data:
   run_data.write(result+'\n')
   
 #update cache
 try:
-  with open('.cache') as cache_file:
+  with open(os.path.dirname(os.path.realpath(__file__))+'/.cache') as cache_file:
     cache_list=deque(cache_file,5)
 except IOError:
   cache_list=deque()
 cache_list.append(result+'\n')
 logging.debug('current cache: %s',cache_list)
 
-with open('.cache','w') as cache_file:
+with open(os.path.dirname(os.path.realpath(__file__))+'/.cache','w') as cache_file:
   for line in cache_list:
     cache_file.write(line)
 
