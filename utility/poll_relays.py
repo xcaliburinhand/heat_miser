@@ -10,6 +10,8 @@ import time
 from collections import deque
 
 logging.basicConfig(level=logging.INFO)
+eastern=pytz.timezone('US/Eastern')
+now = eastern.localize(datetime.datetime.fromtimestamp(time.time()))
 
 try:
   import RPi.GPIO as GPIO
@@ -42,7 +44,7 @@ if hd==True:
   result = str(status).ljust(8)
 else:
   header = 'timestamp,Burner'
-  result=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')+','
+  result=now.strftime('%Y-%m-%d %H:%M')+','
   result+=str(status)
 
 for zone in config['zones']:
@@ -90,12 +92,14 @@ for therm in config['thermostats']:
     result += ','
     result += str(status)
 
+if nopi!=True:
+  GPIO.cleanup()
+
 if hd==True:
   print(header)
 print(result)
-
-if nopi!=True:
-  GPIO.cleanup()
+with open('run_data/'+now.strftime('%Y%m%d')+'.json','a') as run_data:
+  run_data.write(result+'\n')
   
 #update cache
 try:
