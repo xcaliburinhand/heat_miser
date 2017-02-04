@@ -3,15 +3,15 @@ import datetime
 import ecobee
 import json
 import logging
-import pytz
+import os
 import random
 import re
 import time
 from collections import deque
 
 logging.basicConfig(level=logging.INFO)
-eastern=pytz.timezone('US/Eastern')
-now = eastern.localize(datetime.datetime.fromtimestamp(time.time()))
+os.environ['TZ'] = 'US/Eastern'
+now = datetime.datetime.fromtimestamp(time.time())
 
 try:
   import RPi.GPIO as GPIO
