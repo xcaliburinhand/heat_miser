@@ -1,2 +1,2 @@
 [Timer]
-OnCalendar=*:0/15
+OnCalendar=*:1,16,31,46,59

@@ -2,7 +2,6 @@ before_script:
   - env
 stages:
   - deploy
-  - config
 Deploy:
   stage: deploy
   script:
@@ -10,8 +9,3 @@ Deploy:
     - cp -r ${CI_PROJECT_DIR}/www/* /var/www/html/
     - rm -f /opt/heatmiser/*.py
     - cp -r ${CI_PROJECT_DIR}/utility/* /opt/heatmiser/
-Config services:
-  stage: config
-  script:
-    - cp relay-poll* /etc/systemd/system
-    - cp heatmiser-parse* /etc/systemd/system

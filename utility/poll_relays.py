@@ -62,7 +62,7 @@ for zone in config['zones']:
     result += ','
     result += str(status)
 
-if datetime.datetime.now().minute % 5 == 0:
+if datetime.datetime.now().minute % 3 == 0:
   bee=ecobee.Client('LXaXX6lrtFoRml81RPvS0Q07BGrFoaeh',authfile='/etc/heatmiser/ecobee.conf')
   data = bee.get("thermostatSummary", {
         "selection": {
@@ -74,7 +74,7 @@ if datetime.datetime.now().minute % 5 == 0:
   status_list=data['statusList']
 
 for therm in config['thermostats']:
-  if datetime.datetime.now().minute % 5 == 0:
+  if datetime.datetime.now().minute % 3 == 0:
       regex=re.compile(".*("+config['thermostats'][therm]+").*")
       equip_status = [m.group(0) for l in status_list for m in [regex.search(l)] if m]
       if "heat" in equip_status[0].lower():
