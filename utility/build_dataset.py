@@ -8,7 +8,7 @@ import os
 import time
 from operator import itemgetter
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 os.environ['TZ'] = 'US/Eastern'
 now = datetime.datetime.fromtimestamp(time.time())
 
@@ -19,7 +19,7 @@ cols= [
         {"id":"","label":"Equipment Stop","pattern":"","type":"date"}
       ]
 
-with open('config.json') as configfile:
+with open("/etc/heatmiser/config.json") as configfile:
   config = json.load(configfile)
   
 for zone in config['zones']:
