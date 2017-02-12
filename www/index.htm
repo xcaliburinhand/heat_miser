@@ -41,6 +41,16 @@
 						$("#indicators").append("<div id=\"indicator_" + key + "\" style=\"text-align:center;width:80px;height:40px;\"><p style=\"height:34px;\">" + key + "</p><div class=\"circle\" style=\"margin:0 auto;" + indicator + "\"></div></div>");
 					});
 				});
+				updateStats();
+			}
+
+			function updateStats() {
+				var beginDate = new Date(document.getElementById('dateString').innerText);
+				var d = beginDate.getDate() > 9 ? beginDate.getDate() : "0" + beginDate.getDate();
+				$.getJSON("data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + d + "_overall.json", function(json) {
+					$("#stats").append("Burner Runtime: " + json['burner_runtime'] + "<br>");
+					$("#stats").append("Gallons used: " + ((json['burner_runtime'] / 60) * 1.1).toFixed(2).toString() + "<br>");
+				});
 			}
 
 			function drawEquipChart() {
@@ -107,7 +117,9 @@
 		</script>
 	</head>
 	<body>
-		<div id="indicators" style="display:flex;height:60px;"></div>
+		<div id="info" style="display:inline-flex">
+			<div id="indicators" style="display:flex;height:100px;"></div><div id="stats"></div>
+		</div>
 		<br>
 		<br>
 		<div id="equip_chart_div"></div>
