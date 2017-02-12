@@ -1,2 +1,5 @@
 [Timer]
 OnCalendar=*:1,16,31,46,59
+
+[Install]
+WantedBy=multi-user.target

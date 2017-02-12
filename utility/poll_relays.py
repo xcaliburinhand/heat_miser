@@ -9,7 +9,7 @@ import re
 import time
 from collections import deque
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 os.environ['TZ'] = 'US/Eastern'
 now = datetime.datetime.fromtimestamp(time.time())
 

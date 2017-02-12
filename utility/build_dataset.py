@@ -38,6 +38,7 @@ call_store={}
 rows =[]
 calls = []
 i=0
+burner_time=0
 
 with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'.csv') as csvfile:
   reader = csv.DictReader(csvfile,fieldnames=fields)
@@ -62,6 +63,7 @@ with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime(
               str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
               datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
               ,"f":None}]})
+            burner_time+=(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M")-datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M")).total_seconds()/60
           else:
             rows.append({"c":[{"v":device.title(),"f":None},{"v":
               datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
@@ -96,6 +98,7 @@ for device in equip:
         str(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").month-1)+
         datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M").strftime(', %d, %H, %M)')
         ,"f":None}]})
+      burner_time+=(datetime.datetime.strptime(row['time'],"%Y-%m-%d %H:%M")-datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M")).total_seconds()/60
     else:
       rows.append({"c":[{"v":device.title(),"f":None},{"v":
         datetime.datetime.strptime(status_store[device],"%Y-%m-%d %H:%M").strftime('Date(%Y, ')+
@@ -180,7 +183,7 @@ dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
 with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'.json','w') as out:
   json.dump(dataTable,out)
-dataTable={"cols":cols,"rows":calls}
+dataTable={"cols":cols,"rows":calls,"burner_runtime":burner_time}
 with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_overall.json','w') as out:
   json.dump(dataTable,out)
   
