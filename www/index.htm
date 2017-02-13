@@ -47,9 +47,11 @@
 			function updateStats() {
 				var beginDate = new Date(document.getElementById('dateString').innerText);
 				var d = beginDate.getDate() > 9 ? beginDate.getDate() : "0" + beginDate.getDate();
+				$("#stats").empty();
 				$.getJSON("data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).substring(0, 2) + d + "_overall.json", function(json) {
 					$("#stats").append("Burner Runtime: " + json['burner_runtime'] + "<br>");
 					$("#stats").append("Gallons used: " + ((json['burner_runtime'] / 60) * 1.1).toFixed(2).toString() + "<br>");
+					$("#stats").append("HHI base: " + (((json['burner_runtime'] / 60) * 1.1 * 138500)/4000).toFixed(4).toString() + "<br>");
 				});
 			}
 
