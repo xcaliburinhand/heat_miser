@@ -13,6 +13,69 @@ logging.basicConfig(level=logging.WARN)
 os.environ['TZ'] = 'US/Eastern'
 now = datetime.datetime.fromtimestamp(time.time())
 
+def _pin_value(pin):
+  if nopi!=True:
+    GPIO.setup(pin, GPIO.IN)
+    pinval = GPIO.input(pin)
+    logging.debug("value of pin %s is %s",pin,pinval)
+    return pinval
+  else:
+    return random.randrange(0,2)
+  
+def _adc_value(channel):
+  if nopi!=True:
+    SPICLK = 23
+    SPIMISO = 21
+    SPIMOSI = 19
+    SPICS = 24
+     
+    # set up the SPI interface pins
+    GPIO.setup([SPIMOSI, SPICLK, SPICS], GPIO.OUT)
+    GPIO.setup(SPIMISO, GPIO.IN)
+    
+    adcval=readadc(channel, SPICLK, SPIMOSI, SPIMISO, SPICS)
+    logging.debug("value of adc channel %s is %s",channel,adcval)
+  else:
+    return random.randrange(0,2)
+  
+# read SPI data from MCP3008 chip, 8 possible adc's (0 thru 7)
+def readadc(adcnum, clockpin, mosipin, misopin, cspin):
+  if nopi==True:
+    return
+
+  if ((adcnum > 7) or (adcnum < 0)):
+          return -1
+  GPIO.output(cspin, True)
+
+  GPIO.output(clockpin, False)  # start clock low
+  GPIO.output(cspin, False)     # bring CS low
+
+  commandout = adcnum
+  commandout |= 0x18  # start bit + single-ended bit
+  commandout <<= 3    # we only need to send 5 bits here
+  for i in range(5):
+    if (commandout & 0x80):
+      GPIO.output(mosipin, True)
+    else:
+      GPIO.output(mosipin, False)
+    commandout <<= 1
+    GPIO.output(clockpin, True)
+    GPIO.output(clockpin, False)
+
+  adcout = 0
+  # read in one empty bit, one null bit and 10 ADC bits
+  for i in range(12):
+    GPIO.output(clockpin, True)
+    GPIO.output(clockpin, False)
+    adcout <<= 1
+    if (GPIO.input(misopin)):
+      adcout |= 0x1
+
+  GPIO.output(cspin, True)
+  
+  adcout >>= 1       # first bit is 'null' so drop it
+  return adcout
+
 try:
   import RPi.GPIO as GPIO
   nopi=False
@@ -48,11 +111,13 @@ else:
   result+=str(status)
 
 for zone in config['zones']:
-  if nopi!=True:
-    GPIO.setup(config['zones'][zone]['pin'], GPIO.IN)
-    status=GPIO.input(config['zones'][zone]['pin'])
+  if "pin" in config['zones'][zone]:
+    status=_pin_value(config['zones'][zone]['pin'])
+  elif "adc" in config['zones'][zone]:
+    status=_adc_value(config['zones'][zone]['spi'])
   else:
-    status=random.randrange(0,2)
+    logging.warn("No interface defined for %s",zone)
+    
   if hd==True:
     header += zone+'  '
     result += str(status).ljust(2+len(zone))
@@ -131,8 +196,3 @@ for heading in header.split(','):
   
 with open(config['data_dir']+'/current_state.json','w') as out:
   json.dump(current_state,out)
-  
-  
-  
-
-  
