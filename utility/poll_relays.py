@@ -45,7 +45,7 @@ def _adc_value(adc_channel):
       time.sleep(0.25)
     #adcval = int(reply, 2) #/ 2**10
     adcval=val/8
-    logging.debug("value of adc channel %s is %s",channel,adcval)
+    logging.debug("value of adc channel %s is %s",adc_channel,adcval)
     if adcval>=795:
       return 1
     else:
