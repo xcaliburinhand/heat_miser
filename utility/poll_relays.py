@@ -21,63 +21,41 @@ def _pin_value(pin):
     return pinval
   else:
     return random.randrange(0,2)
-  
-def _adc_value(channel):
+
+def bitstring(n):
+    s = bin(n)[2:]
+    return '0'*(8-len(s)) + s
+
+def _adc_value(adc_channel):
   if nopi!=True:
-    SPICLK = 23
-    SPIMISO = 21
-    SPIMOSI = 19
-    SPICS = 24
-     
-    # set up the SPI interface pins
-    GPIO.setup([SPIMOSI, SPICLK, SPICS], GPIO.OUT)
-    GPIO.setup(SPIMISO, GPIO.IN)
-    
-    adcval=readadc(channel, SPICLK, SPIMOSI, SPIMISO, SPICS)
+    conn = spidev.SpiDev(0, 0)
+    conn.max_speed_hz = 1200000 # 1.2 MHz
+    conn.mode = 0
+    logging.debug("spi mode=%s",conn.mode)
+    cmd = 192 #start bit + single ended
+    cmd = 128
+    if adc_channel:
+        cmd += 32
+    val=0
+    for num in range(0,8):
+      reply_bytes = conn.xfer2([cmd, 0])
+      reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
+      reply = reply_bitstring[5:15]
+      val+=int(reply,2)
+      time.sleep(0.25)
+    #adcval = int(reply, 2) #/ 2**10
+    adcval=val/8
     logging.debug("value of adc channel %s is %s",channel,adcval)
+    if adcval>=795:
+      return 1
+    else:
+      return 0
   else:
     return random.randrange(0,2)
-  
-# read SPI data from MCP3008 chip, 8 possible adc's (0 thru 7)
-def readadc(adcnum, clockpin, mosipin, misopin, cspin):
-  if nopi==True:
-    return
-
-  if ((adcnum > 7) or (adcnum < 0)):
-          return -1
-  GPIO.output(cspin, True)
-
-  GPIO.output(clockpin, False)  # start clock low
-  GPIO.output(cspin, False)     # bring CS low
-
-  commandout = adcnum
-  commandout |= 0x18  # start bit + single-ended bit
-  commandout <<= 3    # we only need to send 5 bits here
-  for i in range(5):
-    if (commandout & 0x80):
-      GPIO.output(mosipin, True)
-    else:
-      GPIO.output(mosipin, False)
-    commandout <<= 1
-    GPIO.output(clockpin, True)
-    GPIO.output(clockpin, False)
-
-  adcout = 0
-  # read in one empty bit, one null bit and 10 ADC bits
-  for i in range(12):
-    GPIO.output(clockpin, True)
-    GPIO.output(clockpin, False)
-    adcout <<= 1
-    if (GPIO.input(misopin)):
-      adcout |= 0x1
-
-  GPIO.output(cspin, True)
-  
-  adcout >>= 1       # first bit is 'null' so drop it
-  return adcout
 
 try:
   import RPi.GPIO as GPIO
+  import spidev
   nopi=False
 except RuntimeError:
   logging.error("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
@@ -99,6 +77,12 @@ except Exception as e:
 if nopi!=True:
   GPIO.setup(config['burner']['pin'], GPIO.IN)
   status=GPIO.input(config['burner']['pin'])
+  if "pin" in config['burner']:
+    status=_pin_value(config['burner']['pin'])
+  elif "adc" in config['burner']:
+    status=_adc_value(config['burner']['adc'])
+  else:
+    logging.warn("No interface defined for burner")
 else:
   status=random.randrange(0,2)
 
@@ -114,7 +98,7 @@ for zone in config['zones']:
   if "pin" in config['zones'][zone]:
     status=_pin_value(config['zones'][zone]['pin'])
   elif "adc" in config['zones'][zone]:
-    status=_adc_value(config['zones'][zone]['spi'])
+    status=_adc_value(config['zones'][zone]['adc'])
   else:
     logging.warn("No interface defined for %s",zone)
     
