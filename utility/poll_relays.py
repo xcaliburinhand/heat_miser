@@ -37,16 +37,18 @@ def _adc_value(adc_channel):
     if adc_channel:
         cmd += 32
     val=0
-    for num in range(0,8):
+    max=0
+    for num in range(0,50):
       reply_bytes = conn.xfer2([cmd, 0])
       reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
       reply = reply_bitstring[5:15]
       val+=int(reply,2)
-      time.sleep(0.25)
+      if int(reply,2)>max: max=int(reply,2)
+      time.sleep(0.02)
     #adcval = int(reply, 2) #/ 2**10
-    adcval=val/8
-    logging.debug("value of adc channel %s is %s",adc_channel,adcval)
-    if adcval>=795:
+    adcval=val/50
+    logging.debug("value of adc channel %s is %s, max sensed %s",adc_channel,adcval,max)
+    if max>812:
       return 1
     else:
       return 0
@@ -75,8 +77,6 @@ except Exception as e:
   exit(99)  
 
 if nopi!=True:
-  GPIO.setup(config['burner']['pin'], GPIO.IN)
-  status=GPIO.input(config['burner']['pin'])
   if "pin" in config['burner']:
     status=_pin_value(config['burner']['pin'])
   elif "adc" in config['burner']:
