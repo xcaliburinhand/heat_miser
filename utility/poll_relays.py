@@ -37,18 +37,20 @@ def _adc_value(adc_channel):
     if adc_channel:
         cmd += 32
     val=0
+    min=9999
     max=0
-    for num in range(0,50):
+    for num in range(0,100):
       reply_bytes = conn.xfer2([cmd, 0])
       reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
       reply = reply_bitstring[5:15]
       val+=int(reply,2)
       if int(reply,2)>max: max=int(reply,2)
+      if int(reply,2)<min: min=int(reply,2)
       time.sleep(0.02)
     #adcval = int(reply, 2) #/ 2**10
-    adcval=val/50
-    logging.debug("value of adc channel %s is %s, max sensed %s",adc_channel,adcval,max)
-    if max>812:
+    adcval=val/100
+    logging.info("average value of adc channel %s is %s, min %s, max %s",adc_channel,adcval,min,max)
+    if (max>=810 and max<=815) or (max>815 and adcval>=800):
       return 1
     else:
       return 0
