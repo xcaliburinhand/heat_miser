@@ -34,15 +34,24 @@ def average(values):
   return total/len(values)
 
 def stddev(values):
-  min=9999
-  max=0
+  min=min(values)
+  max=max(values)
   total=0
   for val in values:
-    if val>max: max=val
-    if val<min: min=val
-  for val in values:
-    total+=((val-((min+max)/2))*(val-((min+max)/2)))
+    total+=((val-((min+max)/2.0))*(val-((min+max)/2.0)))
   return math.sqrt(total/len(values))
+
+def min(values):
+  min=9999
+  for val in values:
+    if val<min: min=val
+  return min
+
+def max(values):
+  max=0
+  for val in values:
+    if val>max: max=val
+  return max
 
 def _adc_value(adc_channel):
   if nopi!=True:
@@ -55,17 +64,17 @@ def _adc_value(adc_channel):
     if adc_channel:
         cmd += 32
     val=[]
-    min=9999
-    max=0
-    for num in range(0,5000):
+    for num in range(0,1000):
       reply_bytes = conn.xfer2([cmd, 0])
       reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
       reply = reply_bitstring[5:15]
       val.append(int(reply,2))
-      if int(reply,2)>max: max=int(reply,2)
-      if int(reply,2)<min: min=int(reply,2)
       time.sleep(0.001)
-    logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2,stddev(val),min,max,max-min)
+    for num in range(0,10):
+      val.pop(num)
+    min=min(val)
+    max=max(val)
+    logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev(val),min,max,max-min)
     if  (max-min)<20:
       return 0
     elif stddev(val)>5:
