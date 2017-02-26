@@ -27,6 +27,23 @@ def bitstring(n):
     s = bin(n)[2:]
     return '0'*(8-len(s)) + s
 
+def average(values):
+  total=0
+  for val in values:
+    total+=val
+  return total/len(values)
+
+def stddev(values):
+  min=9999
+  max=0
+  total=0
+  for val in values:
+    if val>max: max=val
+    if val<min: min=val
+  for val in values:
+    total+=((val-((min+max)/2))*(val-((min+max)/2)))
+  return math.sqrt(total/len(values))
+
 def _adc_value(adc_channel):
   if nopi!=True:
     conn = spidev.SpiDev(0, 0)
@@ -37,26 +54,21 @@ def _adc_value(adc_channel):
     cmd = 128
     if adc_channel:
         cmd += 32
-    val=0
-    sqrval=0
+    val=[]
     min=9999
     max=0
     for num in range(0,5000):
       reply_bytes = conn.xfer2([cmd, 0])
       reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
       reply = reply_bitstring[5:15]
-      val+=int(reply,2)
-      sqrval+=(int(reply,2)*int(reply,2))
+      val.append(int(reply,2))
       if int(reply,2)>max: max=int(reply,2)
       if int(reply,2)<min: min=int(reply,2)
       time.sleep(0.001)
-    #adcval = int(reply, 2) #/ 2**10
-    adcval=val/5000
-    sqradcval=math.sqrt(sqrval/5000)
-    logging.info("average value of adc channel %s is %s, squared average %s, min %s, max %s, diff %s",adc_channel,adcval,sqradcval,min,max,max-min)
+    logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2,stddev(val),min,max,max-min)
     if  (max-min)<20:
       return 0
-    elif sqradcval<793:
+    elif stddev(val)>5:
       return 1
     else:
       return 0
