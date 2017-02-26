@@ -3,13 +3,14 @@ import datetime
 import ecobee
 import json
 import logging
+import math
 import os
 import random
 import re
 import time
 from collections import deque
 
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=logging.INFO)
 os.environ['TZ'] = 'US/Eastern'
 now = datetime.datetime.fromtimestamp(time.time())
 
@@ -37,20 +38,25 @@ def _adc_value(adc_channel):
     if adc_channel:
         cmd += 32
     val=0
+    sqrval=0
     min=9999
     max=0
-    for num in range(0,100):
+    for num in range(0,5000):
       reply_bytes = conn.xfer2([cmd, 0])
       reply_bitstring = ''.join(bitstring(n) for n in reply_bytes)
       reply = reply_bitstring[5:15]
       val+=int(reply,2)
+      sqrval+=(int(reply,2)*int(reply,2))
       if int(reply,2)>max: max=int(reply,2)
       if int(reply,2)<min: min=int(reply,2)
-      time.sleep(0.02)
+      time.sleep(0.001)
     #adcval = int(reply, 2) #/ 2**10
-    adcval=val/100
-    logging.info("average value of adc channel %s is %s, min %s, max %s",adc_channel,adcval,min,max)
-    if (max>=810 and max<=815) or (max>815 and adcval>=800):
+    adcval=val/5000
+    sqradcval=math.sqrt(sqrval/5000)
+    logging.info("average value of adc channel %s is %s, squared average %s, min %s, max %s, diff %s",adc_channel,adcval,sqradcval,min,max,max-min)
+    if  (max-min)<20:
+      return 0
+    elif sqradcval<793:
       return 1
     else:
       return 0
