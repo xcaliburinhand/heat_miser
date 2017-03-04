@@ -33,7 +33,7 @@ def average(values):
     total+=val
   return total/len(values)
 
-def stddev(values):
+def _stddev(values):
   min=_min(values)
   max=_max(values)
   total=0
@@ -74,10 +74,13 @@ def _adc_value(adc_channel):
       val.pop(num)
     min=_min(val)
     max=_max(val)
-    logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev(val),min,max,max-min)
-    if  (max-min)<20:
+    stddev=_stddev(val)
+    logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev,min,max,max-min)
+    if (max-min)<30 or stddev>=13:
       return 0
-    elif stddev(val)>5:
+    elif stddev>=8 and average(val)<=793:
+      return 0
+    elif stddev>=6.5:
       return 1
     else:
       return 0
