@@ -76,11 +76,11 @@ def _adc_value(adc_channel):
     max=_max(val)
     stddev=_stddev(val)
     logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev,min,max,max-min)
-    if (max-min)<30 or stddev>=13:
+    if (max-min)<20 or stddev>=12.5:
       return 0
-    elif stddev>=8 and average(val)<=793:
+    elif stddev>=8 and (max-min)<=41:
       return 0
-    elif stddev>=6.5:
+    elif stddev>=6.3:
       return 1
     else:
       return 0
