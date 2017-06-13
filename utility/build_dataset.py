@@ -183,7 +183,7 @@ dataTable={"cols":cols,"rows":rows}
 logging.debug(dataTable)
 with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'.json','w') as out:
   json.dump(dataTable,out)
-dataTable={"cols":cols,"rows":calls,"burner_runtime":burner_time}
+dataTable={"cols":cols,"rows":calls,"burner_runtime":burner_time,"query_ecobee":config['query_ecobee']}
 with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_overall.json','w') as out:
   json.dump(dataTable,out)
   

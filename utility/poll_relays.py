@@ -143,7 +143,7 @@ for zone in config['zones']:
     result += ','
     result += str(status)
 
-if datetime.datetime.now().minute % 3 == 0:
+if config['query_ecobee']==True and datetime.datetime.now().minute % 3 == 0:
   bee=ecobee.Client('LXaXX6lrtFoRml81RPvS0Q07BGrFoaeh',authfile='/etc/heatmiser/ecobee.conf')
   data = bee.get("thermostatSummary", {
         "selection": {

@@ -52,6 +52,7 @@
 					$("#stats").append("Burner Runtime: " + json['burner_runtime'] + "<br>");
 					$("#stats").append("Gallons used: " + ((json['burner_runtime'] / 60) * 1.1).toFixed(2).toString() + "<br>");
 					$("#stats").append("HHI base: " + (((json['burner_runtime'] / 60) * 1.1 * 138500)/4000).toFixed(4).toString() + "<br>");
+					$("#stats").append("Poll ecobee.com: " + json['query_ecobee'].toString() + "<br>");
 				});
 			}
 
