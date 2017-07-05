@@ -76,6 +76,8 @@ def _adc_value(adc_channel):
     max=_max(val)
     stddev=_stddev(val)
     logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev,min,max,max-min)
+    with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'_debug.csv','a') as debug_data:
+      debug_data.write(now.strftime('%Y-%m-%d %H:%M')+','+average(val)+','+(min+max)/2.0+','+stddev+','+min+','+max+','+max-min+'\n')
     if (max-min)<20 or stddev>=12.5:
       return 0
     elif stddev>=8 and (max-min)<=41:
@@ -155,7 +157,7 @@ if config['query_ecobee']==True and datetime.datetime.now().minute % 3 == 0:
   status_list=data['statusList']
 
 for therm in config['thermostats']:
-  if datetime.datetime.now().minute % 3 == 0:
+  if config['query_ecobee']==True and datetime.datetime.now().minute % 3 == 0:
       regex=re.compile(".*("+config['thermostats'][therm]+").*")
       equip_status = [m.group(0) for l in status_list for m in [regex.search(l)] if m]
       if "heat" in equip_status[0].lower():
