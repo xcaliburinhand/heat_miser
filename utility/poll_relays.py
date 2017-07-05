@@ -78,7 +78,9 @@ def _adc_value(adc_channel):
     logging.info("average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s",adc_channel,average(val),(min+max)/2.0,stddev,min,max,max-min)
     with open(os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'_debug.csv','a') as debug_data:
       debug_data.write(now.strftime('%Y-%m-%d %H:%M')+','+str(average(val))+','+str((min+max)/2.0)+','+str(stddev)+','+str(min)+','+str(max)+','+str(max-min)+'\n')
-    if (max-min)<20 or stddev>=12.5:
+    if (max-min)>50 and stddev>14:
+      return 1
+    elif (max-min)<20 or stddev>=12.5:
       return 0
     elif stddev>=8 and (max-min)<=41:
       return 0
