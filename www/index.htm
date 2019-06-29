@@ -7,7 +7,7 @@
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script type="text/javascript">
 			google.charts.load('current', {
-				'packages' : ['timeline']
+				'packages' : ['timeline','corechart','line']
 			});
 
 			function displayDate(direction) {
@@ -26,6 +26,7 @@
 				document.getElementById('dateString').innerText = newDate.toDateString();
 				google.charts.setOnLoadCallback(drawEquipChart);
 				google.charts.setOnLoadCallback(drawHeatChart);
+				google.charts.setOnLoadCallback(drawTempChart);
 				updateCurrentState();
 			}
 
@@ -117,6 +118,38 @@
 
 				chart.draw(data, options);
 			}
+			
+			function drawTempChart() {
+				var beginDate = new Date(document.getElementById('dateString').innerText);
+				var d = beginDate.getDate() > 9 ? beginDate.getDate() : "0" + beginDate.getDate();
+				var jsonData = $.ajax({
+					url : "data/" + beginDate.getFullYear() + ('0' + parseInt(beginDate.getMonth() + 1).toString()).slice(-2) + d + "_temps.json",
+					dataType : "json",
+					async : false
+				}).responseText;
+				try {
+					var data = new google.visualization.DataTable(jsonData);
+				} catch (err) {
+					document.getElementById('heat_chart_div').innerHTML = '<b>No data available</b><br/>';
+					return;
+				}
+
+				var options = {
+					height : 350,
+					explorer: {},
+				  vAxis: {
+					  viewWindowMode: 'pretty'
+				  }
+				};
+
+				var chart = new google.visualization.LineCharte(document.getElementById('temp_chart_div'));
+
+				chart.draw(data, options);
+			}
+			
+			document.addEventListener('DOMContentLoaded', function() {
+				displayDate();
+			});
 		</script>
 	</head>
 	<body>
@@ -127,11 +160,9 @@
 		<br>
 		<div id="equip_chart_div"></div>
 		<div id="heat_chart_div"></div>
+		<div id="temp_chart_div"></div>
 		<div id="date_selector">
-			<a onclick='displayDate("-");' style="cursor: pointer">&lt;</a>&nbsp;<span id="dateString">
-				<script>
-					displayDate();
-				</script></span>&nbsp;<a onclick='displayDate("+");' style="cursor: pointer">&gt;</a>
+			<a onclick='displayDate("-");' style="cursor: pointer">&lt;</a>&nbsp;<span id="dateString"></span>&nbsp;<a onclick='displayDate("+");' style="cursor: pointer">&gt;</a>
 		</div>
 	</body>
 </html>

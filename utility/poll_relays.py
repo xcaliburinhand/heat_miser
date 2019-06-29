@@ -9,6 +9,7 @@ import random
 import re
 import time
 from collections import deque
+from pip._vendor.html5lib.filters.sanitizer import allowed_protocols
 
 logging.basicConfig(level=logging.INFO)
 os.environ['TZ'] = 'US/Eastern'
@@ -153,10 +154,41 @@ if config['query_ecobee']==True and datetime.datetime.now().minute % 3 == 0:
         "selection": {
             "selectionType":  "registered",
             "selectionMatch": "",
-            "includeEquipmentStatus":   True
+            "includeEquipmentStatus": True
         }
     })
   status_list=data['statusList']
+
+if config['query_ecobee']==True and datetime.datetime.now().minute % 9 == 0:
+  try:
+    with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_temps.json') as json_file:  
+      json_data = json.load(json_file)
+  except IOError:
+    json_data = {}
+  if 'cols' not in json_data:
+    json_data = {"cols":[],"rows":[]}
+  cols = [{"type":"datetime"}]
+  row = [{"v":now.strftime('Date(%Y,%m,%d,%H,%M)')}]
+  temps = now.strftime('%Y-%m-%d %H:%M')
+  data = bee.get("thermostat", {
+        "selection": {
+            "selectionType":  "registered",
+            "selectionMatch": "",
+            "includeSensors": True
+        }
+    })
+  them_list=data['thermostatList']
+  for therm in them_list:
+    for sensor in therm['remoteSensors']:
+      cols.append({"label":sensor['name'],"type":"number"})
+      temp=str(float(filter(lambda capability: capability['type'] == 'temperature', sensor['capability'])[0]['value'])/10)
+      temps += ','+temp
+      row.append({"v":temp})
+  print(temps)
+  json_data['cols']=cols
+  json_data['rows'].append({"c":row})
+  with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_temps.json','w') as json_file:
+    json.dump(json_data, json_file)
 
 for therm in config['thermostats']:
   if config['query_ecobee']==True and datetime.datetime.now().minute % 3 == 0:
