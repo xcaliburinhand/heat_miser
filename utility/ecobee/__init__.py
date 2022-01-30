@@ -24,8 +24,9 @@ REPORT_COLUMNS = (
     'zoneHumidity', 'zoneHumidityHigh', 'zoneHumidityLow', 'zoneHvacMode', 'zoneOccupancy'
 )
 
-STATUS_SECTIONS = ('device', 'equipmentStatus', 'events', 'runtime',
-                   'remoteSensors', 'program', 'settings',
+STATUS_SECTIONS = (
+    'device', 'equipmentStatus', 'events', 'runtime',
+    'remoteSensors', 'program', 'settings'
 )
 UNITS_F = '°F'
 UNITS_C = '°C'
@@ -127,7 +128,7 @@ class Client(object):
         result = response.json()
         self.auth['access_token'] = result['code']
         self.auth['token_type'] = 'authorize'
-        self.auth['expiration'] = datetime.datetime.now() + datetime.timedelta(minutes=int(result['expires_in']))
+        self.auth['expiration'] = datetime.datetime.now() + datetime.timedelta(seconds=int(result['expires_in']))
         self.auth['refresh_token'] = None
 
         self.log.info("""Please log onto the ecobee web portal, log in, select the menu
@@ -177,9 +178,9 @@ You have {expiry} minutes.
 
         self.log.info("refreshing authorization")
         response = self._raw_post('token',
-                                  grant_type = 'refresh_token',
-                                  code       = self.auth['refresh_token'],
-                                  client_id  = self.apikey)
+                                  grant_type    = 'refresh_token',
+                                  refresh_token = self.auth['refresh_token'],
+                                  client_id     = self.apikey)
         self._authorize_update(response)
 
 
@@ -196,7 +197,7 @@ You have {expiry} minutes.
         self.auth["access_token"]  = result["access_token"]
         self.auth["token_type"]    = result["token_type"]
         self.auth["refresh_token"] = result["refresh_token"]
-        self.auth["expiration"]    = datetime.datetime.now() + datetime.timedelta(minutes=int(result["expires_in"]))
+        self.auth["expiration"]    = datetime.datetime.now() + datetime.timedelta(seconds=int(result["expires_in"]))
         self.auth["required"]      = False
 
 
