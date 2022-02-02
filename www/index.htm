@@ -25,7 +25,7 @@
 				}
 				document.getElementById('dateString').innerText = newDate.toDateString();
 				google.charts.setOnLoadCallback(drawEquipChart);
-				google.charts.setOnLoadCallback(drawHeatChart);
+				//google.charts.setOnLoadCallback(drawHeatChart);
 				google.charts.setOnLoadCallback(drawTempChart);
 				updateCurrentState();
 			}
@@ -73,7 +73,7 @@
 				}
 
 				var options = {
-					height : 350,
+					height : 500,
 					hAxis : {
 						minValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 0, 0),
 						maxValue : new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate(), 23, 59)
