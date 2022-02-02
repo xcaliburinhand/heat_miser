@@ -93,11 +93,14 @@ def _adc_value(adc_channel):
     stddev = _stddev(val)
     common = _most_occur(val)
     logger.info(
-        "average value of adc channel %s is %s, median %s, std dev %s, min %s, max %s, diff %s, common %s",
-        adc_channel, average(val), (min+max)/2.0, stddev, min, max, max-min, common
+        "average value of adc channel %s is %s, median %s, std dev %s, "
+        "min %s, max %s, diff %s, common %s",
+        adc_channel, average(val), (min+max)/2.0, stddev,
+        min, max, max-min, common
     )
+    debug_filename = now.strftime('%Y%m%d')+'_debug.csv'
     with open(
-        os.path.dirname(os.path.realpath(__file__))+'/run_data/'+now.strftime('%Y%m%d')+'_debug.csv',
+        os.path.dirname(os.path.realpath(__file__))+'/run_data/'+debug_filename,
         'a'
     ) as debug_data:
         debug_data.write(now.strftime('%Y-%m-%d %H:%M')+','+str(average(val))+','+str((min+max)/2.0)+','+str(stddev)+','+str(min)+','+str(max)+','+str(max-min)+'\n')
@@ -105,14 +108,19 @@ def _adc_value(adc_channel):
         if min >= 733 and min <= 735:
             return 1
         return 0  # over 60 not in range
-    if (max-min) >= 27 and common >= 752 and common <= 768 and min >= 739 and min <= 744:
+    # min 739 - 745; diff >= 27; common 752 - 768
+    if (max-min) >= 27 and common >= 752 and common <= 768 and min >= 739 and min <= 745:
         return 1
+    # min 749 - 751; diff > 40
     if (max-min) > 40 and min >= 749 and min <= 751:
         return 1
-    if (min+max)/2.0 >= 768.0 and (min+max)/2.0 <= 771.5 and min >= 751 and min <= 753:
+    # median 767.0 - 771.5; min 751 - 754
+    if (min+max)/2.0 >= 767.0 and (min+max)/2.0 <= 771.5 and min >= 751 and min <= 754:
         return 1
-    if average(val) >= 755 and average(val) <= 757 and max >= 770 and max <= 772:
+    # average 755 - 757; max 770 - 773
+    if average(val) >= 755 and average(val) <= 757 and max >= 770 and max <= 773:
         return 1
+    # median 772.0 -773.0; max 790 - 792
     if max >= 790 and max <= 792 and (min+max)/2.0 >= 772.0 and (min+max)/2.0 <= 773.0:
         return 1
     return 0
@@ -123,8 +131,12 @@ try:
     import spidev
     nopi = False
 except RuntimeError:
-    logger.error("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
+    logger.error(
+        'Error importing RPi.GPIO!  '
+        'This is probably because you need superuser privileges.  '
+        'You can achieve this by using ''sudo'' to run your script')
 except ImportError:
+    logger.warn('Raspberry Pi module not found')
     nopi = True
 
 if nopi is not True:
@@ -157,7 +169,7 @@ else:
     result = now.strftime('%Y-%m-%d %H:%M')+','
     result += str(status)
 
-for zone in config['zones']:
+for zone in sorted(config['zones']):
     if "pin" in config['zones'][zone]:
         status = _pin_value(config['zones'][zone]['pin'])
     elif "adc" in config['zones'][zone]:
@@ -217,7 +229,7 @@ if config['query_ecobee'] is True and datetime.datetime.now().minute % 9 == 0:
     with open(config['data_dir']+'/'+now.strftime('%Y%m%d')+'_temps.json', 'w') as json_file:
         json.dump(json_data, json_file)
 
-for therm in config['thermostats']:
+for therm in sorted(config['thermostats']):
     if config['query_ecobee'] is True and datetime.datetime.now().minute % 3 == 0:
         regex = re.compile(".*("+config['thermostats'][therm]+").*")
         equip_status = [m.group(0) for l in status_list for m in [regex.search(l)] if m]
