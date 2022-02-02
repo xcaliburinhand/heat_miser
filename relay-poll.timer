@@ -1,5 +1,6 @@
 [Timer]
-OnCalendar=*:*:22
+OnCalendar=*-*-* *:*:22
+AccuracySec=1ms
 
 [Install]
 WantedBy=multi-user.target
