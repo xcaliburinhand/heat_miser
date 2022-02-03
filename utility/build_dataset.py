@@ -17,7 +17,11 @@ cols = [
         {"id": "", "label": "Equipment Stop", "pattern": "", "type": "date"}
     ]
 
-with open("/etc/heatmiser/config.json") as configfile:
+config_path = "/etc/heatmiser/config.json"
+config_env = os.environ.get('HEATMISER_CONFIG')
+if config_env is not None:
+    config_path = config_env
+with open(config_path) as configfile:
     config = json.load(configfile)
 
 for zone in sorted(config['zones']):
@@ -140,17 +144,20 @@ for device in equip:
     else:
         rows.append(datapoint)
 
+# no heat calls
+if len(device_usage.keys()) == 0:
     calls.append(datapoint_item(
-        "Heat Call",
-        last_time,
-        last_time))
+        'Heat Call',
+        now.strftime('%Y-%m-%d 00:00'),
+        now.strftime('%Y-%m-%d 00:00')))
 
 # any device on results in call_store[timestamp] = 1
 calllist = call_store.keys()
 calllist = sorted(calllist)
 logging.debug(calllist)
 end = None
-calllist_end = calllist[-1]
+if calllist:
+    calllist_end = calllist[-1]
 for calltime in calllist:
     if end is None:
         # list start
@@ -162,7 +169,7 @@ for calltime in calllist:
         datetime.datetime.strptime(calltime, form) -
         datetime.datetime.strptime(end, form)).total_seconds()
 
-    if seconds_diff == 60:
+    if seconds_diff == 60 and calltime != calllist_end:
         # no transition, update end
         end = calltime
         continue
@@ -172,7 +179,8 @@ for calltime in calllist:
     calls.append(datapoint_item(
         "Heat Call",
         beg,
-        end
+        (datetime.datetime.strptime(end, form) +
+            datetime.timedelta(minutes=1)).strftime(form)
     ))
     beg = calltime
     end = calltime
